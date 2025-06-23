@@ -9,6 +9,7 @@ package viper.silver.verifier
 import viper.silver.ast.Program
 import viper.silver.components.LifetimeComponent
 import viper.silver.reporter.{NoopReporter, Reporter}
+import viper.silver.frontend.SilFrontendConfig
 
 /** An abstract class for verifiers of Viper programs.
   *
@@ -74,6 +75,11 @@ trait Verifier extends LifetimeComponent {
     */
   def parseCommandLine(args: Seq[String]): Unit
 
+  /**
+    * Since we need to provide the verifier's config in SilFrontend.configureVerifier we better have some way to get it
+    */
+  def config: SilFrontendConfig
+
   /** Starts the verifier. Afterwards, a series of calls to `verify` is expected,
     * finally followed by a call to `stop`.
     * Is expected to be preceded by a call to `parseCommandLine`.
@@ -116,6 +122,11 @@ class NoVerifier extends Verifier {
   def verify(program: Program) = ???
 
   def stop() = {}
+
+  def config = new SilFrontendConfig(Seq(), "NoVerifier") {
+    // This is a dummy config, it should never be used.
+    override def exit: Boolean = true
+  }
 }
 
 /** A description of a dependency of a verifier. */

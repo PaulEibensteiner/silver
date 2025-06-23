@@ -145,5 +145,5 @@ case class TimeoutOccurred(n: Long, units: String) extends AbstractError {
 case class AbortedExceptionally(cause: Throwable) extends AbstractError {
   def pos = NoPosition
   def fullId = "exceptional.error"
-  def readableMessage = s"Verification aborted exceptionally"
+  def readableMessage = s"Verification aborted exceptionally\n${cause.getMessage()}\n${cause.getStackTrace()}"
 }

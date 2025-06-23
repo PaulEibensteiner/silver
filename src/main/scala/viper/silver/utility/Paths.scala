@@ -10,6 +10,7 @@ import java.io.File
 import java.net.{URI, URL}
 import java.nio.file.{FileSystem, FileSystems, Path}
 import scala.jdk.CollectionConverters._
+import java.util.Collections
 
 /**
   * A collection of utility methods for dealing with paths and environment variables.
@@ -101,7 +102,17 @@ object Paths {
 
         fs.getPath(entryName)
 
-      case other => sys.error(s"Resource $uri of scheme $other is not supported.")
+      case "resource" => 
+        // This hack registers NativeImageResourceFileSystemProvider & NativeImageResourceFileSystem when ran via Native Image
+        // It allows lookups using "resource:/" URIs which means calls like Path.of(URI) will not fail.
+        // https://github.com/oracle/graal/issues/7682
+
+        try {
+          java.nio.file.Paths.get(uri)
+        } catch {
+          case _ => FileSystems.newFileSystem(URI.create("resource:/"), Collections.singletonMap("create", "true"));
+        }
+        java.nio.file.Paths.get(uri)
     }
   }
 
